@@ -87,7 +87,8 @@ export const RepositoriesItemAvatar = styled.img`
 `;
 
 export const RepositoriesItemContent = styled.div`
-  margin-left: 16px;
+  margin: 0 16px;
+  flex: 1;
 `;
 
 export const RepositoriesItemTitle = styled.strong`
