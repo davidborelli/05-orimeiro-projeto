@@ -18,6 +18,7 @@ interface Repository {
 
 const Dashboard: React.FC = () => {
   const [newRepo, setNewRepo] = useState('');
+  const [inputError, setInputError] = useState('');
   const [repositories, setRepositories] = useState<Repository[]>([]);
 
   useEffect(() => {
@@ -32,9 +33,19 @@ const Dashboard: React.FC = () => {
   ): Promise<void> => {
     event.preventDefault();
 
-    const { data } = await api.get<Repository>(`repos/${newRepo}`);
-    setRepositories([...repositories, data]);
-    setNewRepo('');
+    if (!newRepo) {
+      setInputError('Digite autor/nome do repositório');
+      return;
+    }
+
+    try {
+      const { data } = await api.get<Repository>(`repos/${newRepo}`);
+      setRepositories([...repositories, data]);
+      setNewRepo('');
+      setInputError('');
+    } catch (error) {
+      setInputError('Erro ao buscar o diretório informado');
+    }
   };
 
   return (
@@ -44,12 +55,15 @@ const Dashboard: React.FC = () => {
 
       <S.Form onSubmit={handleAddRepository}>
         <S.InputRepo
+          hasError={!!inputError}
           value={newRepo}
           onChange={(event) => setNewRepo(event.target.value)}
           placeholder="Digite o nome do repositório"
         />
         <S.ButtonSubmit type="submit">Pesquisar</S.ButtonSubmit>
       </S.Form>
+
+      {inputError && <S.Error>{inputError}</S.Error>}
 
       <S.Repositories>
         {repositories.map((repo) => (
