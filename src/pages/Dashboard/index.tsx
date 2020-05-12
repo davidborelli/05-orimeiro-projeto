@@ -79,8 +79,7 @@ const Dashboard: React.FC = () => {
         {repositories.map((repo) => (
           <S.RepositoriesItemLink
             key={repo.full_name}
-            href={repo.html_url}
-            target="_blank"
+            to={`/repository/${repo.full_name}`}
           >
             <S.RepositoriesItem>
               <S.RepositoriesItemAvatar

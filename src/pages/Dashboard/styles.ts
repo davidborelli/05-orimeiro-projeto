@@ -1,5 +1,6 @@
 import styled, { css } from 'styled-components';
 import { shade } from 'polished';
+import { Link } from 'react-router-dom';
 
 interface FormProps {
   hasError: boolean;
@@ -70,7 +71,7 @@ export const Repositories = styled.div`
   max-width: 700px;
 `;
 
-export const RepositoriesItemLink = styled.a`
+export const RepositoriesItemLink = styled(Link)`
   background: #fff;
   border-radius: 5px;
   width: 100%;
