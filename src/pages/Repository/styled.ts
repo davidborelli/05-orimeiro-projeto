@@ -80,7 +80,7 @@ export const Repositories = styled.div`
   margin-top: 80px;
 `;
 
-export const RepositoriesItemLink = styled(Link)`
+export const RepositoriesItemLink = styled.a`
   background: #fff;
   border-radius: 5px;
   width: 100%;

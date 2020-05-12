@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import {
   FiChevronLeft as IconLeft,
   FiChevronRight as IconRight,
 } from 'react-icons/fi';
+
+import api from '../../config/api';
 
 import logo from '../../assets/logo.svg';
 
@@ -13,10 +15,47 @@ interface RepositoryParams {
   repository: string;
 }
 
+interface Repository {
+  full_name: string;
+  description: string;
+  stargazers_count: number;
+  forks_count: number;
+  open_issues_count: number;
+  owner: {
+    login: string;
+    avatar_url: string;
+  };
+  html_url: string;
+}
+
+interface Issue {
+  id: number;
+  title: string;
+  html_url: string;
+  user: {
+    login: string;
+  };
+}
+
 const Repository: React.FC = () => {
   const { params } = useRouteMatch<RepositoryParams>();
 
-  console.log(params.repository);
+  const [reposiory, setRepository] = useState<Repository | null>(null);
+  const [issues, setIssues] = useState<Issue[]>([]);
+
+  useEffect(() => {
+    const loadIssues = async (): Promise<void> => {
+      const [repositoryResp, issuesResp] = await Promise.all([
+        api.get(`repos/${params.repository}`),
+        api.get(`repos/${params.repository}/issues`),
+      ]);
+
+      setRepository(repositoryResp.data);
+      setIssues(issuesResp.data);
+    };
+    loadIssues();
+  }, [params.repository]);
+
   return (
     <>
       <S.Header>
@@ -27,43 +66,61 @@ const Repository: React.FC = () => {
         </S.HeaderContainerToBack>
       </S.Header>
 
-      <S.RepositoyInfo>
-        <S.AvatarUser
-          src="https://avatars1.githubusercontent.com/u/21282437?s=460&u=05a9d1b4fc18014623de9473372b9a27bbed7148&v=4"
-          alt="logo"
-        />
-        <S.RepositoyInfoContent>
-          <S.RepositoyInfoTitle>davidborelli/bootcamp</S.RepositoyInfoTitle>
-          <S.RepositoyInfoDescrip>A fucking repo</S.RepositoyInfoDescrip>
-        </S.RepositoyInfoContent>
-      </S.RepositoyInfo>
-      <S.RepoDataContainer>
-        <S.RepoDataItem>
-          <S.RepoDataItemNumber>1808</S.RepoDataItemNumber>
-          <S.RepoDataItemInfo>Stars</S.RepoDataItemInfo>
-        </S.RepoDataItem>
-        <S.RepoDataItem>
-          <S.RepoDataItemNumber>48</S.RepoDataItemNumber>
-          <S.RepoDataItemInfo>Forks</S.RepoDataItemInfo>
-        </S.RepoDataItem>
-        <S.RepoDataItem>
-          <S.RepoDataItemNumber>67</S.RepoDataItemNumber>
-          <S.RepoDataItemInfo>Issues abertas</S.RepoDataItemInfo>
-        </S.RepoDataItem>
-      </S.RepoDataContainer>
+      {reposiory && (
+        <>
+          <S.RepositoyInfo>
+            <S.AvatarUser
+              src={reposiory.owner.avatar_url}
+              alt={reposiory.owner.login}
+            />
+            <S.RepositoyInfoContent>
+              <S.RepositoyInfoTitle>{reposiory.full_name}</S.RepositoyInfoTitle>
+              <S.RepositoyInfoDescrip>
+                {reposiory.description}
+              </S.RepositoyInfoDescrip>
+            </S.RepositoyInfoContent>
+          </S.RepositoyInfo>
+          <S.RepoDataContainer>
+            <S.RepoDataItem>
+              <S.RepoDataItemNumber>
+                {reposiory.stargazers_count}
+              </S.RepoDataItemNumber>
+              <S.RepoDataItemInfo>Stars</S.RepoDataItemInfo>
+            </S.RepoDataItem>
+            <S.RepoDataItem>
+              <S.RepoDataItemNumber>
+                {reposiory.forks_count}
+              </S.RepoDataItemNumber>
+              <S.RepoDataItemInfo>Forks</S.RepoDataItemInfo>
+            </S.RepoDataItem>
+            <S.RepoDataItem>
+              <S.RepoDataItemNumber>
+                {reposiory.open_issues_count}
+              </S.RepoDataItemNumber>
+              <S.RepoDataItemInfo>Issues abertas</S.RepoDataItemInfo>
+            </S.RepoDataItem>
+          </S.RepoDataContainer>
+        </>
+      )}
 
       <S.Repositories>
-        <S.RepositoriesItemLink to="/la">
-          <S.RepositoriesItem>
-            <S.RepositoriesItemContent>
-              <S.RepositoriesItemTitle>Nomezao da poha</S.RepositoriesItemTitle>
-              <S.RepositoriesItemDescription>
-                loren ipson mussum cussum pingus
-              </S.RepositoriesItemDescription>
-            </S.RepositoriesItemContent>
-            <IconRight size={20} />
-          </S.RepositoriesItem>
-        </S.RepositoriesItemLink>
+        {issues.map((issue) => (
+          <S.RepositoriesItemLink
+            key={issue.id}
+            href={issue.html_url}
+            target="_blank"
+          >
+            <S.RepositoriesItem>
+              <S.RepositoriesItemContent>
+                <S.RepositoriesItemTitle>{issue.title}</S.RepositoriesItemTitle>
+                <S.RepositoriesItemDescription>
+                  {issue.user.login}
+                </S.RepositoriesItemDescription>
+              </S.RepositoriesItemContent>
+              <IconRight size={20} />
+            </S.RepositoriesItem>
+          </S.RepositoriesItemLink>
+        ))}
       </S.Repositories>
     </>
   );
